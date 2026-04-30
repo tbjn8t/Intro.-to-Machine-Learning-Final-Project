@@ -9,12 +9,41 @@
 
 from data import X_raisin, y_raisin, X_white, y_white, X_red, y_red
 
-from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 from sklearn.manifold import TSNE
 import umap.umap_ as umap
 import numpy as np
 
+# PCA Computation
+class PCA:
+    def _init_(self, n_components):
+        self.n_components = n_components
+
+    def fit_transform(self, X):
+        X = np.array(X)
+        
+        # Standardize data
+        self.mean = np.mean(X, axis=0)
+        X_s = X - self.mean
+        
+        # Covariance
+        Sigma = np.cov(X_s, rowvar=False)
+        
+        # Eigenvector/value problem
+        eigenvalues, eigenvectors = np.linalg.eig(Sigma)
+        
+        # Sort eigenvectors by highest eigenvalue
+        idxs = np.argsort(eigenvalues)[::-1]
+        eigenvectors = eigenvectors[:, idxs]
+        
+        # Choose top n_component eigenvectors
+        self.components = eigenvectors[:, :self.n_components]
+
+        # Returns dot product of initial dataset (strandardized)
+        # and the top eigenvectors
+        return np.dot(X_s, self.components)
+        
+        
 # 2D PCA Plot
 def pca_2d(X, y, title="2D PCA"):
     X = np.array(X)
