@@ -71,11 +71,15 @@ class K_Nearest_Neighbor:
         self.y_train = y     
          
     def predict_single(self, x):
+        # Find distance to training samples
         distances = np.sqrt(np.sum((self.X_train - x) ** 2, axis=1))
         
+        # Sort distances and get class labels
+        # from k nearest neightbors
         k_idx = np.argsort(distances)[:self.k]
         k_nearest = [self.y_train[i] for i in k_idx]
         
+        # Return most common class
         return Counter(k_nearest).most_common(1)[0][0]
     
     def predict(self, X):
@@ -96,7 +100,6 @@ class LDA:
         self.cov_inv = None
     
     def fit(self, X, y):
-        
         n_samples, n_features = X.shape
         self.classes = np.unique(y)
         
@@ -120,6 +123,7 @@ class LDA:
     def discriminant(self, x, c):
         mean = self.means[c]
         
+        # x^T * Sigma^-1 * u - (0.5 * u^T * Sigma^-1 * u) + ln(P(c))
         term1 = x @ self.cov_inv @ mean
         term2 = -0.5 * mean @ self.cov_inv @ mean
         term3 = np.log(self.priors[c])
@@ -153,7 +157,7 @@ class QDA:
         n_samples, n_features = X.shape
         self.classes = np.unique(y)
         
-        # Compute means and priors
+        # Compute means, priors, and cov
         for c in self.classes:
             X_c = X[y == c]
             self.means[c] = np.mean(X_c, axis=0)
@@ -175,6 +179,7 @@ class QDA:
         
         diff = x - mean
         
+        # -(0.5) * log|Sigma| - 0.5 * (x - u)^T * Sigma^-1 * (x - u) + log(P(c))
         term1 = -0.5 * np.log(cov_det)
         term2 = -0.5 * diff @ cov_inv @ diff
         term3 = np.log(self.priors[c])
