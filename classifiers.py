@@ -61,7 +61,7 @@ class NaiveBayes:
     
     
 class K_Nearest_Neighbor:
-    def __init__(self, k=5):
+    def __init__(self, k):
         self.k = k
         self.X_train = None
         self.y_train = None

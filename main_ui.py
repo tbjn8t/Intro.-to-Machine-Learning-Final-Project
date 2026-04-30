@@ -78,8 +78,8 @@ def run_ui():
         
         # Request k value for KNN when chosen
         if model_in == "2":
-            k = int(input("Enter k value for KNN (ex. 5, 10): "))
-            model_class = lambda: K_Nearest_Neighbor(k=k)
+            k_nn = int(input("Enter k value for KNN (ex. 5, 10): "))
+            model_class = lambda: K_Nearest_Neighbor(k=k_nn)
         
         # CV method selection
         cv_methods = {
@@ -135,9 +135,9 @@ def run_ui():
                 print_cm_report(cm, classes, title=f"{name} - {model_name} - {cv_name} \nConfusion Matrix")            
             elif cv_in == "2":
                 # KFold CM
-                k = int(input("Number of folds {ex. 5}: "))
+                k_fold = int(input("Number of folds {ex. 5}: "))
                 random_state = int(input("Random seed {ex. 1, 42}: "))
-                y_true, y_pred = kfold_cm(model_class, X, y, k=k, shuffle=True, random_state=random_state)
+                y_true, y_pred = kfold_cm(model_class, X, y, k=k_fold, shuffle=True, random_state=random_state)
                 cm, classes = confusion_matrix(y_true, y_pred)
                 print_cm_report(cm, classes, title=f"{name} - {model_name} - {cv_name} \nConfusion Matrix")            
             elif cv_in == "3":

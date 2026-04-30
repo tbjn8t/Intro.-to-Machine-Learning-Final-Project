@@ -16,7 +16,7 @@ import numpy as np
 
 # PCA Computation
 class PCA:
-    def _init_(self, n_components):
+    def __init__(self, n_components):
         self.n_components = n_components
 
     def fit_transform(self, X):
