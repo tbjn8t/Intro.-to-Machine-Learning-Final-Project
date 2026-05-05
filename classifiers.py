@@ -7,7 +7,7 @@
 ############################################################
 
 import numpy as np
-from collections import Counter
+from collections import Counter    
 
 class NaiveBayes:
     def __init__(self):
@@ -89,6 +89,51 @@ class K_Nearest_Neighbor:
     def score(self, X, y):
         predictions = self.predict(X)
         return np.mean(predictions == y)   
+    
+
+class ParzenHypercube:
+    def __init__(self, h=1):
+        self.h = h
+        self.classes = None
+        self.class_data = {}
+    
+    def fit(self, X, y):
+        X = np.array(X)
+        y = np.array(y)        
+        self.classes = np.unique(y)   
+        self.class_data = {}     
+
+        for c in self.classes:
+            self.class_data[c] = X[y == c]
+    
+    def parzen_density(self, x, X_i):
+        d = x.shape[0]
+        
+        diff = np.abs((X_i - x) / self.h)
+        inside = np.all(diff <= 0.5, axis=1)
+        
+        count = np.sum(inside)
+        
+        if count == 0:
+            return 1e-9
+        return count / (len(X_i) * (self.h ** d))
+    
+    def predict_single(self, x):
+        scores = []
+        n_samples = sum(len(i) for i in self.class_data.values())
+        
+        for c in self.classes:
+            X_i = self.class_data[c]
+            density = self.parzen_density(x, X_i)
+            prior = len(X_i) / n_samples
+            scores.append(density * prior)
+        return self.classes[np.argmax(scores)]
+    
+    def predict(self, X):
+        return np.array([self.predict_single(x) for x in X])
+    
+    def score(self, X, y):
+        return np.mean(self.predict(X) == y)    
 
 
 class LDA:
@@ -166,7 +211,7 @@ class QDA:
             cov = np.cov(X_c, rowvar=False)
             
             # Regularization for stability
-            cov += 1e-6 * np.eye(n_features)
+            cov += 1e-9 * np.eye(n_features)
             
             self.covs[c] = cov
             self.cov_invs[c] = np.linalg.inv(cov)

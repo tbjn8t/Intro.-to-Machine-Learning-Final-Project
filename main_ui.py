@@ -13,7 +13,7 @@ from data import white_samples, white_features
 from data import red_samples, red_features
 
 from cv_accuracy import repeated_holdout, repeated_kfold, loocv, holdout_cv, kfold_cv, print_acc_report
-from classifiers import NaiveBayes, K_Nearest_Neighbor, LDA, QDA
+from classifiers import NaiveBayes, K_Nearest_Neighbor, ParzenHypercube, LDA, QDA
 from cv_confusion import holdout_cm, kfold_cm, loocv_cm
 from cv_confusion import confusion_matrix, print_cm_report
 from PCA import pca_2d, tsne_2d, umap_2d
@@ -45,19 +45,21 @@ def run_ui():
         models = {
             "1": ("Naive Bayes", NaiveBayes),
             "2": ("KNN", K_Nearest_Neighbor),
-            "3": ("LDA", LDA),
-            "4": ("QDA", QDA),
+            "3": ("Parzen", ParzenHypercube),
+            "4": ("LDA", LDA),
+            "5": ("QDA", QDA),
         }
         print("\nSelect classifier:")
         print("1 - Naive Bayes")
         print("2 - KNN")
-        print("3 - LDA")
-        print("4 - QDA")
-        print("5 - Plot Samples")
+        print("3 - Parzen Window (Hypercube)")
+        print("4 - LDA")
+        print("5 - QDA")
+        print("6 - Plot Samples")
         model_in = input("Choice: ")
         
         # Plotting sub selection tree
-        if model_in == "5":
+        if model_in == "6":
             print("\nSelect Plot Methjod:")
             print("1 - PCA")
             print("2 - t-SNE")
@@ -80,6 +82,9 @@ def run_ui():
         if model_in == "2":
             k_nn = int(input("Enter k value for KNN (ex. 5, 10): "))
             model_class = lambda: K_Nearest_Neighbor(k=k_nn)
+        elif model_in == "3":
+            h_pw = int(input("Enter h value for Parzen Window (ex. 1, 5): "))
+            model_class = lambda: ParzenHypercube(h=h_pw)
         
         # CV method selection
         cv_methods = {
