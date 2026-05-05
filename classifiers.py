@@ -91,9 +91,9 @@ class K_Nearest_Neighbor:
         return np.mean(predictions == y)   
     
 
-class ParzenHypercube:
-    def __init__(self, h=1):
-        self.h = h
+class ParzenGaussian:
+    def __init__(self, sigma=1.0):
+        self.sigma = sigma
         self.classes = None
         self.class_data = {}
     
@@ -106,17 +106,15 @@ class ParzenHypercube:
         for c in self.classes:
             self.class_data[c] = X[y == c]
     
-    def parzen_density(self, x, X_i):
+    def parzen_gaussian(self, x, X_i):
         d = x.shape[0]
+        sigma = self.sigma
+        diff = X_i - x
+        dist2 = np.sum(diff**2, axis=1)
         
-        diff = np.abs((X_i - x) / self.h)
-        inside = np.all(diff <= 0.5, axis=1)
-        
-        count = np.sum(inside)
-        
-        if count == 0:
-            return 1e-9
-        return count / (len(X_i) * (self.h ** d))
+        const = 1 / ((2 * np.pi * sigma**2) ** (d/2))
+
+        return np.mean(const * np.exp(-dist2 / (2 * sigma**2)))
     
     def predict_single(self, x):
         scores = []
@@ -124,9 +122,9 @@ class ParzenHypercube:
         
         for c in self.classes:
             X_i = self.class_data[c]
-            density = self.parzen_density(x, X_i)
+            density = self.parzen_gaussian(x, X_i)
             prior = len(X_i) / n_samples
-            scores.append(density * prior)
+            scores.append(np.log(density + 1e-9) + np.log(prior))
         return self.classes[np.argmax(scores)]
     
     def predict(self, X):
