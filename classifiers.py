@@ -139,52 +139,111 @@ class LDA:
         self.classes = None
         self.means = {}
         self.priors = {}
-        self.cov = None
-        self.cov_inv = None
+        
+        self.global_mean = None
+        
+        self.Sw = None
+        self.Sb = None
+        
+        self.eigenvalues = None
+        self.eigenvectors = None
+        
+        self.W = None
+        self.projected_means = {}
     
     def fit(self, X, y):
+        X = np.array(X)
+        y = np.array(y)
+
         n_samples, n_features = X.shape
+
         self.classes = np.unique(y)
+        n_classes = len(self.classes)
+
+        # Overall mean
+        self.global_mean = np.mean(X, axis=0)
+        
+        # Initialize scatter matrices
+        self.Sw = np.zeros((n_features, n_features))
+        self.Sb = np.zeros((n_features, n_features))        
         
         # Compute means and priors
         for c in self.classes:
             X_c = X[y == c]
-            self.means[c] = np.mean(X_c, axis=0)
+            mean_c = np.mean(X_c, axis=0)
+            self.means[c] = mean_c
             self.priors[c] = len(X_c) / n_samples
+            
+            # Sw
+            centered = X_c - mean_c
+            self.Sw += centered.T @ centered
+            
+            # Sb
+            n_c = X_c.shape[0]
+            
+            mean_diff = (mean_c - self.global_mean).reshape(n_features, 1)
+            self.Sb += n_c * (mean_diff @ mean_diff.T)
         
-        # Compute covariance matrix
-        self.cov = np.zeros((n_features, n_features))
+        # Sw regularization    
+        self.Sw += 1e-9 * np.eye(n_features)
+        
+        # Solve eigenvalue problem
+        # Sw^-1 * Sb
+        A = np.linalg.inv(self.Sw) @ self.Sb
+        
+        self.eigenvalues, self.eigenvectors = np.linalg.eig(A)
+        
+        # Sort eigenvectors by largest eigenvalue
+        idx = np.argsort(self.eigenvalues)[::-1]
+        self.eigenvalues = self.eigenvalues[idx]
+        self.eigenvectors = self.eigenvectors[:, idx]
+        
+        # Kepp top eigenvectors
+        n_components = min(n_classes - 1, n_features)
+        self.W = np.real(self.eigenvectors[:, :n_components])
+        
+        # Project class means
         for c in self.classes:
-            X_c = X[y == c]
-            centered = X_c - self.means[c]
-            self.cov += centered.T @ centered
-        self.cov /= (n_samples - len(self.classes))
-        
-        # Compute inverse
-        self.cov_inv = np.linalg.inv(self.cov)    
+            self.projected_means[c] = self.means[c] @ self.W  
          
-    def discriminant(self, x, c):
-        mean = self.means[c]
+    def transform(self, X):
+        X = np.array(X)
+        return np.real(X @ self.W)
+    
+    def predict_single(self, x):
+        x = np.array(x)
         
-        # x^T * Sigma^-1 * u - (0.5 * u^T * Sigma^-1 * u) + ln(P(c))
-        term1 = x @ self.cov_inv @ mean
-        term2 = -0.5 * mean @ self.cov_inv @ mean
-        term3 = np.log(self.priors[c])
+        x_proj = np.real(x @ self.W)
         
-        return term1 + term2 + term3
+        distances = []
+        
+        for c in self.classes:
+            mean_proj = self.projected_means[c]
+            
+            # Euclidean distance
+            dist = np.linalg.norm(x_proj - mean_proj)
+            distances.append(dist)
+            
+        return self.classes[np.argmin(distances)]
     
     def predict(self, X):
         X = np.array(X)
         
         predictions = []
+        
         for x in X:
-            scores = [self.discriminant(x, c) for c in self.classes]
-            predictions.append(self.classes[np.argmax(scores)])
+            predictions.append(self.predict_single(x))
+            
         return np.array(predictions)
 
     # Give accuracy score
     def score(self, X, y):
-        return np.mean(self.predict(X) == y) 
+        X = np.array(X)
+        y = np.array(y)
+        
+        predictions = self.predict(X)        
+        
+        return np.mean(predictions == y) 
     
       
 class QDA:
