@@ -14,7 +14,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-k_values = range(1, 50)
+k_values = range(1, 25)
 best_k = None
 best_score = -np.inf
 
@@ -22,7 +22,7 @@ results = {}
 
 for k in k_values:   
     model_class = lambda: K_Nearest_Neighbor(k=k)
-    mean, std, avg_time, tot_time = repeated_holdout(model_class, X_red, y_red, n_runs=20, test_size=0.2, seed_offset=0)
+    mean, std, avg_time, tot_time = repeated_holdout(model_class, X_raisin, y_raisin, n_runs=20, test_size=0.2, seed_offset=0)
 
     score = mean - std
     

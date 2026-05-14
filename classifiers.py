@@ -4,6 +4,7 @@
 # Thomas Joswiak
 # classifiers.py
 # File defines all classifer functions
+# Naive Bayes, KNN, PW, LDA, and QDA
 ############################################################
 
 import numpy as np

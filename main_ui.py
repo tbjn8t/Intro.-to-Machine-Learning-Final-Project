@@ -19,7 +19,6 @@ from cv_confusion import confusion_matrix, print_cm_report
 from PCA import pca_2d, tsne_2d, umap_2d
 
 def run_ui():
-    import numpy as np
     
     while True: 
         # UI header

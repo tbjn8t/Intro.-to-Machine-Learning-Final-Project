@@ -2,9 +2,10 @@
 # ECE4720 Final Project
 # Machine Learning and Pattern Recognition
 # Thomas Joswiak
-# k_value.py
-# Used to find best k_value for KNN
+# sigma_value.py
+# Used to find best sigma for PW
 # for each dataset
+# Essentially the same as k_value.py
 ############################################################
 
 from cv_accuracy import repeated_holdout, repeated_kfold, loocv, holdout_cv, kfold_cv, print_acc_report
@@ -25,7 +26,7 @@ for sigma in sigma_values:
     print(f"sigma={sigma}")
     
     model_class = lambda sigma=sigma: ParzenGaussian(sigma=sigma)
-    mean, std, avg_time, tot_time = repeated_holdout(model_class, X_white, y_white, n_runs=20, test_size=0.2, seed_offset=0)
+    mean, std, avg_time, tot_time = repeated_holdout(model_class, X_raisin, y_raisin, n_runs=20, test_size=0.2, seed_offset=0)
 
     score = mean - std
     

@@ -2,9 +2,8 @@
 # ECE4720 Final Project
 # Machine Learning and Pattern Recognition
 # Thomas Joswiak
-# main.py
-# Main workflow
-# Mostly function calls and printing
+# data.py
+# Collects datasets from excel and csv files
 ############################################################
 
 import pandas as pd

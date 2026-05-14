@@ -36,7 +36,7 @@ def holdout_cv(model_class, X, y, test_size=0.2, shuffle=True, random_state=None
     return model.score(X_test, y_test)
 
 
-def kfold_cv(model_class, X, y, k=5, shuffle=True, random_state=42):
+def kfold_cv(model_class, X, y, k=5, shuffle=True, random_state=None):
     X = np.array(X)
     y = np.array(y)
      

@@ -12,7 +12,7 @@ from classifiers import NaiveBayes, K_Nearest_Neighbor, LDA, QDA
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
-def holdout_cm(model_class, X, y, test_size=0.2, shuffle=True, random_state=42):
+def holdout_cm(model_class, X, y, test_size=0.2, shuffle=True, random_state=0):
     X = np.array(X)
     y = np.array(y)
     
@@ -37,7 +37,7 @@ def holdout_cm(model_class, X, y, test_size=0.2, shuffle=True, random_state=42):
     
     return y_test, y_pred
 
-def kfold_cm(model_class, X, y, k=5, shuffle=True, random_state=42):
+def kfold_cm(model_class, X, y, k, shuffle=True, random_state=0):
     X = np.array(X)
     y = np.array(y)
      
